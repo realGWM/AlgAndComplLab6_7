@@ -46,7 +46,7 @@ fn test(rng: &mut ThreadRng) {
     println!("Heapification 2:\n{:?}", to_be_heapified2);
     fn is_heapified<T: Ord>(slice: &[T], top: usize) -> bool {
         let left = top * 2 + 1;
-        let right = top * 2 + 1;
+        let right = top * 2 + 2;
         if left < slice.len() && (slice[left] > slice[top] || !is_heapified(slice, left)) {
             return false;
         }
