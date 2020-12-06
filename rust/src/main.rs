@@ -41,7 +41,9 @@ fn test(rng: &mut ThreadRng) {
     let mut to_be_heapified1: Vec<i32> = vec.clone();
     let mut to_be_heapified2: Vec<i32> = vec.clone();
     HeapifiedSlice::heapify_1(&mut to_be_heapified1);
+    println!("Heapification 1:\n{:?}", to_be_heapified1);
     HeapifiedSlice::heapify_2(&mut to_be_heapified2);
+    println!("Heapification 2:\n{:?}", to_be_heapified2);
     fn is_heapified<T: Ord>(slice: &[T], top: usize) -> bool {
         let left = top * 2 + 1;
         let right = top * 2 + 1;
@@ -81,7 +83,7 @@ fn test(rng: &mut ThreadRng) {
     println!("Heap v1 sorted:\n{:?}", vec5);
 
     let mut vec6: Vec<i32> = vec.clone();
-    heap1_sort(&mut vec6);
+    heap2_sort(&mut vec6);
     println!("Heap v2 sorted:\n{:?}", vec6);
 
     assert!(vec0 == vec1, "Selection sort is incorrect!");
