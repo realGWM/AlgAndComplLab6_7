@@ -282,14 +282,30 @@ struct HeapifiedSlice<'a, T: Ord> {
 
 impl <'a, T: 'a + Ord> HeapifiedSlice<'a, T> {
 
-    //top element has no parent
-    fn get_heap_parent(k: usize) -> Option<usize> {
-        (k.checked_sub(1)).map(|elem| elem / 2)
+    //k should not be 0
+    fn get_parent(k: usize) -> usize {
+        (k - 1) / 2
+    }
+
+    fn get_left_child(top: usize) -> usize {
+        top * 2 + 1
+    }
+
+    fn get_right_child(top: usize) -> usize {
+        top * 2 + 2
+    }
+
+    fn conditional_swap(slice: &mut [T], largest: &mut usize, child: usize) {
+        if child < slice.len() {
+            if slice[child] > slice[*largest] {
+                *largest = child;
+            }
+        }
     }
 
     fn fix_heap_bottom_to_top(slice: &mut [T], mut idx: usize) {
         while idx > 0 {
-            let parent_idx = Self::get_heap_parent(idx).unwrap(); //safe because idx is > 0
+            let parent_idx = Self::get_parent(idx);
             if slice[parent_idx] < slice[idx] {
                 slice.swap(parent_idx, idx);
                 idx = parent_idx;
@@ -301,24 +317,15 @@ impl <'a, T: 'a + Ord> HeapifiedSlice<'a, T> {
 
     fn fix_heap_top_to_bottom(slice: &mut [T], mut top: usize) {
         loop {
-            let left = top * 2 + 1;
-            let right = top * 2 + 2;
-            if right < slice.len() { //we have two children, and they can have children too
-                if slice[left] >= slice[right] && slice[left] > slice[top] { //left is the biggest
-                    slice.swap(top, left);
-                    top = left;
-                } else if slice[right] >= slice[left] && slice[right] > slice[top] { //right is the biggest
-                    slice.swap(top, right);
-                    top = right;
-                } else { //top is the biggest, we are done
-                    return;
-                }
-            } else if left < slice.len() { //we only have left child who does not have children, we are done after fixing it
-                if slice[left] > slice[top] {
-                    slice.swap(top, left);
-                }
-                return;
-            } else { //we have no children, we are done
+            let mut largest = top;
+
+            Self::conditional_swap(slice, &mut largest, Self::get_left_child(top));
+            Self::conditional_swap(slice, &mut largest, Self::get_right_child(top));
+
+            if top != largest {
+                slice.swap(top, largest);
+                top = largest;
+            } else {
                 return;
             }
         }
@@ -334,7 +341,7 @@ impl <'a, T: 'a + Ord> HeapifiedSlice<'a, T> {
     pub fn heapify_2(slice: &'a mut [T]) -> HeapifiedSlice<'a, T> {
         let last = slice.len() - 1;
         if last > 0 {
-            let parent_of_last = Self::get_heap_parent(last).unwrap(); //safe because last is > 0
+            let parent_of_last = Self::get_parent(last);
             for idx in (0..=parent_of_last).rev() {
                 Self::fix_heap_top_to_bottom(slice, idx);
             }
